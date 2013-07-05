@@ -4,6 +4,9 @@ class Slider extends Component {
 	
 	var cursor : Button;
 	var input : h2d.Interactive;
+	var vertical : Bool;
+	public var fullRange(default, set) : Bool;
+	public var cursorRatio(default, set) : Float;
 	public var value(default, set) : Float;
 	
 	@:access(h2d.comp.Button)
@@ -26,10 +29,12 @@ class Slider extends Component {
 			
 		};
 		value = 0.;
+		fullRange = true;
 	}
 	
 	function pixelToVal( e : h2d.Event ) {
-		return Std.int(e.relX - (style.borderSize + cursor.width * 0.5) ) / (input.width - (style.borderSize * 2 + cursor.width));
+		return vertical ? Std.int(e.relY - (style.borderSize + cursor.height * 0.5) ) / (input.height - (style.borderSize * 2 + cursor.height)) :
+						Std.int(e.relX - (style.borderSize + cursor.width * 0.5) ) / (input.width - (style.borderSize * 2 + cursor.width));
 	}
 	
 	function gotoValue( v : Float ) {
@@ -57,15 +62,40 @@ class Slider extends Component {
 		needRebuild = true;
 		return v;
 	}
+	
+	function set_fullRange(v:Bool) {
+		fullRange = v;
+		needRebuild = true;
+		return v;
+	}
+	
+	function set_cursorRatio(v:Float) {
+		if( vertical )
+			cursor.height = input.height * v;
+		else
+			cursor.width = input.width * v;
+		cursorRatio = v;
+		needRebuild = true;
+		return v;
+	}
 
 	override function resize( ctx : Context ) {
 		super.resize(ctx);
 		if( !ctx.measure ) {
-			input.width = width - (style.marginLeft + style.marginRight) + cursor.width;
-			input.height = cursor.height - (cursor.style.marginTop + cursor.style.marginBottom);
-			input.x = cursor.style.marginLeft - style.borderSize - cursor.width * 0.5;
-			input.y = cursor.style.marginTop;
-			cursor.style.offsetX = contentWidth * value - cursor.width * 0.5;
+			vertical = height > width;
+			if( vertical ) {
+				input.height = height - (style.marginTop + style.marginBottom) + cursor.height;
+				input.width = cursor.width - (cursor.style.marginLeft + cursor.style.marginRight);
+				input.y = cursor.style.marginTop - style.borderSize - cursor.height * 0.5;
+				input.x = cursor.style.marginLeft;
+				cursor.style.offsetY = fullRange ? contentHeight * value - cursor.height * 0.5 : (contentHeight - cursor.height) * value;
+			} else {
+				input.width = width - (style.marginLeft + style.marginRight) + cursor.width;
+				input.height = cursor.height - (cursor.style.marginTop + cursor.style.marginBottom);
+				input.x = cursor.style.marginLeft - style.borderSize - cursor.width * 0.5;
+				input.y = cursor.style.marginTop;
+				cursor.style.offsetX = fullRange ? contentWidth * value - cursor.width * 0.5 : (contentWidth - cursor.width) * value;
+			}
 		}
 	}
 
