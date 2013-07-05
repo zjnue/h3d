@@ -2,10 +2,47 @@ package h2d.comp;
 
 class Box extends Component {
 	
+	var surface : Sprite;
+	var overlay : Sprite;
+	
 	public function new(?layout,?parent) {
 		super("box", parent);
+		surface = new Sprite();
+		overlay = new Sprite();
+		super.addChildAt(surface, 1);
+		super.addChildAt(overlay, 2);
 		if( layout == null ) layout = h2d.css.Defs.Layout.Inline;
 		addClass(":"+layout.getName().toLowerCase());
+	}
+	
+	override public function getSpritesCount() {
+		return surface.getSpritesCount();
+	}
+	
+	override public function addChild( s : Sprite ) {
+		if( surface == null ) super.addChild(s);
+		else surface.addChild(s);
+	}
+	
+	override public function addChildAt( s : Sprite, pos : Int ) {
+		if( surface == null ) super.addChildAt(s, pos);
+		else surface.addChildAt(s, pos);
+	}
+	
+	override public function removeChild( s : Sprite ) {
+		surface.removeChild(s);
+	}
+	
+	override public function getChildAt( n ) {
+		return surface.getChildAt(n);
+	}
+	
+	override function get_numChildren() {
+		return surface.get_numChildren();
+	}
+	
+	override public function iterator() {
+		return surface.iterator();
 	}
 	
 	override function resizeRec( ctx : Context ) {
