@@ -276,7 +276,7 @@ class Sprite {
 		return childs.length;
 	}
 
-	public inline function iterator() {
+	public function iterator() {
 		return childs.iterator();
 	}
 
