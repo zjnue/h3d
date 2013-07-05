@@ -25,9 +25,13 @@ class Slider extends Component {
 		}
 		cursor = new Button("", this);
 		cursor.input.blockEvents = false;
-		cursor.onMouseDown = function() {
-			
+		cursor.onMouseDown = function(e) {
+			input.onPush( new Event(EPush, cursor.x+e.relX, cursor.y+e.relY) );
 		};
+		// FIXME we still loose release outside events
+		cursor.onMouseUp = function() {
+			input.onRelease(null);
+		}
 		value = 0.;
 		fullRange = true;
 	}

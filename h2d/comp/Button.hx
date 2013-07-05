@@ -11,9 +11,9 @@ class Button extends Component {
 		super("button",parent);
 		input = new h2d.Interactive(0, 0, bg);
 		var active = false;
-		input.onPush = function(_) {
+		input.onPush = function(e) {
 			active = true;
-			onMouseDown();
+			onMouseDown(e);
 		};
 		input.onOver = function(_) {
 			addClass(":hover");
@@ -55,7 +55,7 @@ class Button extends Component {
 		}
 	}
 		
-	public dynamic function onMouseDown() {
+	public dynamic function onMouseDown(e) {
 	}
 
 	public dynamic function onMouseUp() {
