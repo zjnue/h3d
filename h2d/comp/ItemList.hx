@@ -20,7 +20,7 @@ class ItemList extends Box {
 		super.resizeRec(ctx);
 		if( !ctx.measure ) {
 			while( inputs.length < components.length )
-				inputs.push(new h2d.Interactive(0, 0, suface));
+				inputs.push(new h2d.Interactive(0, 0, surface));
 			while( inputs.length > components.length )
 				inputs.pop().remove();
 			for( i in 0...components.length ) {
