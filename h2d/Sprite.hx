@@ -12,6 +12,7 @@ class Sprite {
 	public var scaleX(default,set) : Float;
 	public var scaleY(default,set) : Float;
 	public var rotation(default, set) : Float;
+	public var clipBounds(default, set) : h2d.col.Bounds;
 	public var visible : Bool;
 
 	var matA : Float;
@@ -240,6 +241,17 @@ class Sprite {
 	
 	inline function set_rotation(v) {
 		rotation = v;
+		posChanged = true;
+		return v;
+	}
+	
+	// FIXME - needs localToGlobal and to clip this sprite only
+	inline function set_clipBounds(v) {
+		clipBounds = v;
+		if( v == null )
+			h3d.Engine.getCurrent().setRenderZone(0, 0, -1, -1);
+		else
+			h3d.Engine.getCurrent().setRenderZone(Std.int(v.xMin), Std.int(v.yMin), Std.int(v.xMax), Std.int(v.yMax));
 		posChanged = true;
 		return v;
 	}

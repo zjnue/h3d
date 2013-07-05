@@ -2,7 +2,7 @@ package h2d.comp;
 
 class Slider extends Component {
 	
-	var cursor : Button;
+	public var cursor : Button;
 	var input : h2d.Interactive;
 	var vertical : Bool;
 	public var fullRange(default, set) : Bool;

@@ -227,40 +227,110 @@ class Box extends Component {
 			height = contentHeight + extY + extBottom();
 		} else {
 			var overflow : h2d.css.Defs.Overflow = style.overflow != null ? style.overflow : Visible;
-			if( overflow == Inherit ) {
-				var p : Component = this;
-				while( p.parent != null && Std.is(p.parent, Component) ) {
-					p = cast(p.parent, Component);
-					if( p.style.overflow != null && p.style.overflow != Inherit ) {
-						overflow = p.style.overflow;
-						break;
-					}
-				}
+			var p = parentComponent;
+			while( overflow == Inherit && p != null ) {
+				overflow = p.style.overflow != null ? p.style.overflow : Visible;
+				p = p.parentComponent;
 			}
-			var clip = false;
-			var showScrollH = false;
-			var showScrollV = false;
+			if( overflow == Inherit )
+				overflow = Visible;
+			
 			switch( overflow ) {
+			case Visible:
+				if( scrollbarH != null ) scrollbarH.visible = false;
+				if( scrollbarV != null ) scrollbarV.visible = false;
+				if( clipBounds != null ) clipBounds = null;
 			case Hidden:
-				clip = true;
-			case Scroll:
-				clip = showScrollH = showScrollV = true;
-			case Auto:
-				var w = 0.;
-				var h = 0.;
+				if( scrollbarH != null ) scrollbarH.visible = false;
+				if( scrollbarV != null ) scrollbarV.visible = false;
+				doClip();
+			case Auto, Scroll:
+				var scrollRatioH = -1.;
+				var scrollRatioV = -1.;
+				measuredWidth = 0.;
+				measuredHeight = 0.;
 				for( c in components ) {
-					if( c.width > w ) w = c.width;
-					if( c.height > h ) h = c.height;
+					if( c.width > measuredWidth ) measuredWidth = c.width;
+					if( c.height > measuredHeight ) measuredHeight = c.height;
 				}
-				if( w > contentWidth ) showScrollH = true;
-				if( h > contentHeight ) showScrollV = true;
-				clip = showScrollH || showScrollV;
+				var doScrollH = overflow == Scroll || measuredWidth > contentWidth;
+				var doScrollV = overflow == Scroll || measuredHeight > contentHeight;
+				if( doScrollH || doScrollV ) {
+					doClip();
+					var spacer = 11;//(doScrollH && doScrollV) ? 11 : 0;
+					if( doScrollH ) {
+						if( scrollbarH == null ) {
+							scrollbarH = createScrollbar( overlay, 0, contentHeight - 10, contentWidth - spacer, 10, 8 );
+							scrollbarH.onChange = function(val) {
+								surface.x = -(measuredWidth - contentWidth) * val;
+							};
+						}
+						//scrollbarH.cursorRatio = contentWidth / measuredWidth;
+						scrollbarH.visible = true;
+					}
+					if( doScrollV ) {
+						if( scrollbarV == null ) {
+							scrollbarV = createScrollbar( overlay, contentWidth - 10, 0, 10, contentHeight - spacer, 8 );
+							scrollbarV.onChange = function(val) {
+								surface.y = -(measuredHeight - contentHeight) * val;
+							};
+						}
+						//scrollbarV.cursorRatio = contentHeight / measuredHeight;
+						scrollbarV.visible = true;
+					}
+				} else {
+					if( scrollbarH != null && scrollbarH.visible ) scrollbarH.visible = false;
+					if( scrollbarV != null && scrollbarV.visible ) scrollbarV.visible = false;
+					if( clipBounds != null ) clipBounds = null;
+				}
 			default:
 			}
-			
-			//..
 		}
 	}
 	
+	// needs localToGlobal
+	function doClip() {
+		if( clipBounds == null || clipBounds.xMin != x || clipBounds.yMin != y || 
+			clipBounds.xMax != contentWidth || clipBounds.yMax != contentHeight )
+			// perhaps a h2d.col.Bounds.fromEasy(x,y,w,h) / constructor args option?
+			clipBounds = h2d.col.Bounds.fromPoints(
+				new h2d.col.Point(x, y), 
+				new h2d.col.Point(contentWidth, contentHeight)
+			);
+	}
 	
+	// how can we easily update width / height etc. a .refresh() after does not work..
+	function createScrollbar( parent : Sprite, x : Float, y : Float, w : Float, h : Float, cursorSide : Float ) {
+		
+		var scrollbar = new h2d.comp.Slider(parent);
+		
+		scrollbar.width = w;
+		scrollbar.height = h;
+		var s = new h2d.css.Style();
+		s.width = w;
+		s.height = h;
+		s.layout = Absolute;
+		scrollbar.setStyle(s);
+		
+		scrollbar.x = x;
+		scrollbar.y = y;
+		
+		s = new h2d.css.Style();
+		s.marginTop = s.marginRight = s.marginBottom = s.marginLeft = 0;
+		s.paddingTop = s.paddingRight = s.paddingBottom = s.paddingLeft = 0;
+		s.width = s.height = cursorSide;
+		s.layout = Absolute;
+		scrollbar.cursor.setStyle(s);
+		scrollbar.fullRange = false;
+		
+		scrollbar.cursor.width = cursorSide;
+		scrollbar.cursor.height = cursorSide;
+		
+		return scrollbar;
+	}
+	
+	var measuredWidth : Float;
+	var measuredHeight : Float;
+	var scrollbarH : h2d.comp.Slider;
+	var scrollbarV : h2d.comp.Slider;
 }
