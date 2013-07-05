@@ -245,8 +245,6 @@ class Box extends Component {
 				if( scrollbarV != null ) scrollbarV.visible = false;
 				doClip();
 			case Auto, Scroll:
-				var scrollRatioH = -1.;
-				var scrollRatioV = -1.;
 				measuredWidth = 0.;
 				measuredHeight = 0.;
 				for( c in components ) {
